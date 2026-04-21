@@ -1,0 +1,4 @@
+event_id,event_name,event_type,event_time_h,event_start_h,event_end_h,description
+1,feed_adjustment,process_change,30.0,30.0,34.0,"Feed rate stepped from 0.5 to 1.2 L/h at 30 h, then reduced to 0.7 L/h at 34 h. Causes a substrate pulse and a steeper product formation slope."
+2,oxygen_limitation,disturbance,38.0,38.0,42.0,Dissolved oxygen drops below 35 % saturation for ~4 h. Growth and product formation are suppressed during the limitation.
+3,ph_sensor_drift,sensor_fault,42.0,42.0,72.0,pH probe drifts upward at ~0.008 pH units/h starting at 42 h. True process pH remains controlled; measured pH is unreliable.
