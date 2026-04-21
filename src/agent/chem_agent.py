@@ -3,7 +3,7 @@
 from smolagents import ToolCallingAgent, CodeAgent, LiteLLMModel
 
 from ..config import MAX_STEPS
-from ..model_registry import ModelRegistry
+from ..model_registry import get_registry
 from ..agent.system_prompt import SYSTEM_PROMPT
 from ..tools.summary_statistics import summary_statistics
 from ..tools.detect_anomalies import detect_anomalies
@@ -19,9 +19,6 @@ TOOLS = [
     plot_variable,
 ]
 
-_registry = ModelRegistry()
-
-
 _LOCAL_PROVIDERS = {"ollama", "lmstudio"}
 
 
@@ -36,8 +33,9 @@ def build_agent(model_profile: str | None = None):
         model_profile: Name of a profile in models.yaml (e.g. "claude_haiku",
             "local_gemma4_e4b"). Defaults to the registry default.
     """
-    profile_name = model_profile or _registry.default_name()
-    profile = _registry.get(profile_name)
+    registry = get_registry()
+    profile_name = model_profile or registry.default_name()
+    profile = registry.get(profile_name)
 
     litellm_kwargs: dict = {
         "model_id": profile.model_id,

@@ -141,11 +141,10 @@ Verdict: <correct|partial|incorrect>
 Justification: <one sentence>"""
 
     try:
-        from src.model_registry import ModelRegistry
+        from src.model_registry import get_registry
         from smolagents import LiteLLMModel
 
-        registry = ModelRegistry()
-        profile = registry.get(judge_profile)
+        profile = get_registry().get(judge_profile)
         kwargs: dict = {"model_id": profile.model_id, "api_key": profile.api_key}
         if profile.api_base:
             kwargs["api_base"] = profile.api_base

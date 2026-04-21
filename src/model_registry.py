@@ -88,3 +88,14 @@ class ModelRegistry:
 
     def dropdown_choices(self) -> list[str]:
         return list(self._profiles)
+
+
+_shared_registry: ModelRegistry | None = None
+
+
+def get_registry() -> ModelRegistry:
+    """Return a shared ModelRegistry, parsing models.yaml only on first call."""
+    global _shared_registry
+    if _shared_registry is None:
+        _shared_registry = ModelRegistry()
+    return _shared_registry

@@ -14,7 +14,7 @@ import gradio as gr
 from smolagents.agents import ActionStep, FinalAnswerStep
 
 from ..agent.chem_agent import build_agent
-from ..model_registry import ModelRegistry
+from ..model_registry import get_registry
 from ..data.loader import load_timeseries, load_events, T_MAX
 from ..data.query_utils import VALID_COLUMNS
 from ..tools.summary_statistics import summary_statistics
@@ -193,12 +193,11 @@ _EVAL_DISPLAY_COLS = ["id", "type", "question", "expected", "verdict", "justific
 # Agent cache (keyed by profile name)
 # ---------------------------------------------------------------------------
 
-_registry = ModelRegistry()
 _agent_cache: dict[str, object] = {}
 
 
 def get_agent(profile: str | None = None):
-    effective = profile or _registry.default_name()
+    effective = profile or get_registry().default_name()
     if effective not in _agent_cache:
         _agent_cache[effective] = build_agent(effective)
     return _agent_cache[effective]
@@ -209,14 +208,9 @@ def reset_agent() -> None:
 
 
 def _friendly_error(e: Exception) -> str:
-    msg = str(e)
-    if "charmap" in msg or "encode" in msg:
+    if isinstance(e, UnicodeEncodeError):
         return "Agent error: encoding issue. Please try again."
-    if "rate" in msg.lower() or "429" in msg:
-        return "Agent error: API rate limit hit. Wait a moment and retry."
-    if "api" in msg.lower() or "auth" in msg.lower():
-        return "Agent error: API key issue. Check your .env file."
-    return f"Agent error: {msg}"
+    return f"Agent error ({type(e).__name__}): {e}"
 
 
 # ---------------------------------------------------------------------------
@@ -410,16 +404,17 @@ def build_app() -> gr.Blocks:
         gr.HTML(_build_header())
 
         with gr.Row():
+            registry = get_registry()
             model_selector = gr.Dropdown(
-                choices=_registry.dropdown_choices(),
-                value=_registry.default_name(),
+                choices=registry.dropdown_choices(),
+                value=registry.default_name(),
                 label="Model profile",
                 scale=1,
                 interactive=True,
                 info="Switch backend: changes take effect on next query",
             )
             model_status = gr.Textbox(
-                value=f"Active: {_registry.get(_registry.default_name()).label}",
+                value=f"Active: {registry.get(registry.default_name()).label}",
                 show_label=False,
                 interactive=False,
                 scale=3,
@@ -654,7 +649,7 @@ def build_app() -> gr.Blocks:
                 def _on_model_change(profile: str) -> str:
                     reset_agent()
                     try:
-                        label = _registry.get(profile).label
+                        label = get_registry().get(profile).label
                     except Exception:
                         label = profile
                     return f"Active: {label}"
