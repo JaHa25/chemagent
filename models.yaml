@@ -1,0 +1,51 @@
+# ChemAgent model profiles
+# Each profile defines one model backend. Switch profiles via:
+#   - CHEMAGENT_PROFILE env var (overrides default_profile below)
+#   - --profile flag in run_eval.py
+#   - Model dropdown in the Gradio UI
+#
+# api_key: use "${ENV_VAR}" to read from environment, or a literal string.
+# api_base: omit for Anthropic cloud (LiteLLM uses its own default).
+# max_steps: optional per-profile override; falls back to CHEMAGENT_MAX_STEPS.
+
+profiles:
+
+  claude_haiku:
+    label: "Claude Haiku 4.5 (Anthropic cloud)"
+    provider: anthropic
+    model_id: "anthropic/claude-haiku-4-5-20251001"
+    api_key: "${ANTHROPIC_API_KEY}"
+
+  local_gemma_e2b:
+    label: "Gemma 3 2B (Ollama local)"
+    provider: ollama
+    model_id: "ollama/gemma3:2b"
+    api_base: "http://localhost:11434"
+    api_key: "ollama"
+    max_steps: 6
+
+  local_gemma_e4b:
+    label: "Gemma 3 4B (Ollama local)"
+    provider: ollama
+    model_id: "ollama/gemma3:4b"
+    api_base: "http://localhost:11434"
+    api_key: "ollama"
+    max_steps: 6
+
+  local_gemma4_e4b:
+    label: "Gemma 4 4B (Ollama local)"
+    provider: ollama
+    model_id: "ollama/gemma4:e4b"
+    api_base: "http://localhost:11434"
+    api_key: "ollama"
+    max_steps: 6
+
+  lmstudio_local:
+    label: "LM Studio (local, active model)"
+    provider: lmstudio
+    model_id: "openai/local-model"
+    api_base: "http://localhost:1234/v1"
+    api_key: "lm-studio"
+    max_steps: 6
+
+default_profile: claude_haiku
