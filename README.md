@@ -171,8 +171,6 @@ The system prompt is deliberately free of event-specific hints (no windows, magn
 | Q7 — titer change post feed adj. | 1/1 | correct | Reports ~1.8× rate increase |
 | Q8 — substrate after O₂ limit | 1/1 | partial | |
 
-The single regression (Q1) is honest: with no prior knowledge that the pH signal is contaminated, the agent reports the mean it was asked for. Q6 is the strongest result: given only the question *"was there evidence of pH drift after 42 h?"*, the agent runs `compute_trend`, finds a small but significant positive slope in a controlled variable, and concludes it is most consistent with a sensor fault rather than a real process change.
-
 **Gemma 4 4B (local, via Ollama + CodeAgent):** 0/8. The 4B model fails to generate syntactically valid tool calls even in CodeAgent mode. It recognises query intent but cannot reliably invoke the tools. This is expected at the 4B parameter scale and illustrates the capability gap between small local models and cloud-scale LLMs for structured tool use. It is kept in the benchmark as an honest point of comparison rather than quietly dropped.
 
 ## Running tests
