@@ -9,29 +9,18 @@ on a 1-minute resolution time-series dataset (4,321 samples, t=0 to t=72 h).
 | Column            | Unit         | Description                                      |
 |-------------------|--------------|--------------------------------------------------|
 | temperature_c     | degC         | Reactor temperature (controlled ~35 degC)        |
-| ph                | pH           | MEASURED pH: see sensor fault note below        |
+| ph                | pH           | Measured pH (raw sensor signal)                  |
 | do_percent        | % saturation | Dissolved oxygen (setpoint >= 60%)               |
 | biomass_gL        | g/L          | Biomass concentration (Monod growth)             |
 | substrate_gL      | g/L          | Carbon substrate concentration                   |
 | product_titer_gL  | g/L          | Accumulated product titer                        |
 | feed_rate_Lh      | L/h          | Substrate feed rate                              |
 
-## Known operational events
-
-| Event              | Window (h)   | Type           | Effect                                      |
-|--------------------|--------------|----------------|---------------------------------------------|
-| feed_adjustment    | [30.0, 34.0) | process_change | Feed stepped 0.5->1.2->0.7 L/h; substrate  |
-|                    |              |                | pulse; product formation rate increases     |
-| oxygen_limitation  | [38.0, 42.0) | disturbance    | DO drops ~30 pp; biomass/product suppressed |
-| ph_sensor_drift    | [42.0, 72.0) | sensor_fault   | pH probe drifts upward at ~0.008 pH/h;      |
-|                    |              |                | true process pH remains controlled at 6.80  |
-
 ## Tool selection guide
 
 - **summary_statistics**: use for "what was the average/min/max of X between t1 and t2?"
-- **compute_trend**: use for drift, slope, or rate-of-change questions; also the correct
-  tool to diagnose the pH sensor fault (look for a statistically significant positive slope
-  in ph after t=42 h)
+- **compute_trend**: use for drift, slope, or rate-of-change questions; this is also the
+  right tool when you suspect a slow sensor drift (returns slope and significance)
 - **detect_anomalies**: use for sudden spikes or transients (e.g. DO dip, temperature bump);
   NOTE: will NOT flag slow gradual drift because the rolling baseline tracks it: use
   compute_trend for drift instead
@@ -41,10 +30,10 @@ on a 1-minute resolution time-series dataset (4,321 samples, t=0 to t=72 h).
 
 ## Important caveats
 
-1. **pH sensor fault**: The `ph` column is the MEASURED value, which drifts upward after
-   t=42 h at ~0.008 pH/h (cumulative offset ~+0.19 pH by t=72 h). The true process pH
-   remains ~6.80. When reporting pH after t=42 h, always note that the reading is
-   contaminated by sensor drift and does not reflect the true process pH.
+1. **Sensor signals may be unreliable**: Reported values are the measured signals, not
+   ground truth. If you find a slow monotonic trend in a controlled variable, consider
+   whether it is a real process shift or a sensor drift/fault, and flag the ambiguity
+   in your answer rather than reporting the number unqualified.
 
 2. **Time references**: "last 12 hours" = t_start=60.0, t_end=72.0.
    "first 24 hours" = t_start=0.0, t_end=24.0. Dataset ends at t=72.0.
@@ -53,5 +42,5 @@ on a 1-minute resolution time-series dataset (4,321 samples, t=0 to t=72 h).
    detect a slope, then plot_variable to visualise it.
 
 4. **Be concise**: Give a direct numerical answer first, then the interpretation.
-   If a sensor fault affects the answer, flag it prominently.
+   If a sensor fault is suspected, flag it prominently.
 """

@@ -156,7 +156,22 @@ python evaluation/run_eval.py --models claude_haiku,local_gemma4_e4b --judge cla
 
 ### Results
 
-**Claude Haiku 4.5 (cloud):** 8/8 regex checks pass. The agent computes all numerical values correctly, flags the pH sensor fault on Q1 and Q6, identifies the O₂ limitation event on Q5, and reports the ~1.8× product-rate increase on Q7.
+The system prompt is deliberately free of event-specific hints (no windows, magnitudes, or "the pH sensor drifts after 42 h"). The agent has to discover the events from the data using its tools, which is what the eval is testing.
+
+**Claude Haiku 4.5 (cloud):** 10/11 regex checks pass; LLM-as-judge: 6 correct, 2 partial, 0 incorrect.
+
+| Query | Regex | Judge | Note |
+|---|---|---|---|
+| Q1 — avg pH last 12 h | 1/2 | partial | Reports correct mean but does not flag sensor drift |
+| Q2 — max biomass 20–36 h | 1/1 | correct | |
+| Q3 — min DO first 24 h | 1/1 | correct | |
+| Q4 — temp anomalies after 24 h | 1/1 | partial | |
+| Q5 — DO drop near 38 h | 2/2 | correct | Identifies O₂ limitation event |
+| Q6 — pH drift after 42 h | 2/2 | correct | Detects slope and attributes to sensor fault unprompted |
+| Q7 — titer change post feed adj. | 1/1 | correct | Reports ~1.8× rate increase |
+| Q8 — substrate after O₂ limit | 1/1 | partial | |
+
+The single regression (Q1) is honest: with no prior knowledge that the pH signal is contaminated, the agent reports the mean it was asked for. Q6 is the strongest result: given only the question *"was there evidence of pH drift after 42 h?"*, the agent runs `compute_trend`, finds a small but significant positive slope in a controlled variable, and concludes it is most consistent with a sensor fault rather than a real process change.
 
 **Gemma 4 4B (local, via Ollama + CodeAgent):** 0/8. The 4B model fails to generate syntactically valid tool calls even in CodeAgent mode. It recognises query intent but cannot reliably invoke the tools. This is expected at the 4B parameter scale and illustrates the capability gap between small local models and cloud-scale LLMs for structured tool use. It is kept in the benchmark as an honest point of comparison rather than quietly dropped.
 

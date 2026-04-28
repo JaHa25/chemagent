@@ -29,3 +29,7 @@ Thumbs.db
 # Temporary outputs
 *.log
 evaluation/results_*.md
+
+# Personal
+interview_prep.tex
+interview_prep.pdf
